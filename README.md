@@ -19,6 +19,26 @@ Sistema de gestión de precios para adquirentes de medios de pago en el mercado 
 
 ---
 
+## Quickstart
+
+```bash
+# 1. Copy environment variables
+cp .env.example .env
+
+# 2. Start services
+docker compose up --build
+
+# 3. Run migrations (first time only — handled automatically by docker compose)
+docker compose exec api alembic upgrade head
+
+# 4. Access
+#   API:           http://localhost:8000
+#   Swagger docs:  http://localhost:8000/docs
+#   Health check:  http://localhost:8000/health
+```
+
+---
+
 ## Estructura del proyecto
 
 ```
@@ -115,6 +135,22 @@ docker compose up --build
 Levanta la API y PostgreSQL juntos. La API queda disponible en el puerto `8000`.
 
 ---
+
+## Running Tests
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run all unit tests
+pytest tests/unit/ -v
+
+# Run with coverage
+pytest tests/unit/ --cov=app/services --cov-report=term-missing
+
+# Run specific test file
+pytest tests/unit/test_pos_resolution.py -v
+```
 
 ## Tests
 
