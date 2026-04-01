@@ -279,7 +279,7 @@ Resolution endpoints must respond in **< 200ms** (non-functional requirement —
 
 ---
 
-## Development Guidelines (for when implementation begins)
+## Development Guidelines
 
 ### Architecture Recommendations
 - The resolution engines (POS + MDR) are the performance-critical paths — optimize queries with indexes on `entity_type`, `entity_id`, `fecha_inicio`, `fecha_fin`, and `activa`

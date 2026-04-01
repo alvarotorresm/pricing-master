@@ -13,7 +13,7 @@ Sistema de gestión de precios para adquirentes de medios de pago en el mercado 
 | Migraciones | Alembic |
 | Base de datos | PostgreSQL 16 |
 | Validación | Pydantic v2 |
-| Autenticación | JWT + RBAC |
+| Autenticación | Sin auth en v1 — JWT + RBAC en v2 |
 | Tests | pytest + pytest-asyncio |
 | Contenedores | Docker + Docker Compose |
 
@@ -44,16 +44,24 @@ docker compose exec api alembic upgrade head
 ```
 pricing-master/
 ├── app/
-│   ├── api/                  # Routers FastAPI por dominio
-│   │   ├── pos_tarifas.py
-│   │   ├── mdr_tarifas.py
-│   │   ├── promotions.py
-│   │   └── resolucion.py     # Motor de resolución POS + MDR
-│   ├── models/               # Modelos SQLAlchemy (11 tablas)
-│   ├── schemas/              # Schemas Pydantic (request/response)
-│   ├── services/             # Lógica de negocio y validaciones
-│   ├── db.py                 # Sesión y engine de base de datos
-│   └── main.py               # Entry point FastAPI
+│   ├── main.py               # Entry point FastAPI
+│   ├── config.py             # Pydantic BaseSettings
+│   ├── dependencies.py       # DB session injection
+│   ├── core/
+│   │   ├── enums.py          # ENUMs del dominio
+│   │   └── exceptions.py     # HTTP exception wrappers
+│   ├── db/
+│   │   ├── base.py           # SQLAlchemy DeclarativeBase
+│   │   └── session.py        # Async engine + session factory
+│   ├── models/               # Modelos SQLAlchemy 2.x (11 tablas)
+│   ├── schemas/              # Schemas Pydantic v2 (request/response)
+│   ├── services/             # Lógica de negocio + motores de resolución
+│   └── api/                  # Routers FastAPI por dominio
+│       ├── pos_tarifas.py
+│       ├── mdr_tarifas.py
+│       ├── promotions.py
+│       ├── commercial.py
+│       └── resolucion.py     # Motor de resolución POS + MDR
 ├── alembic/                  # Migraciones de base de datos
 ├── tests/
 │   ├── unit/                 # Tests del motor de resolución
@@ -101,8 +109,10 @@ Variables requeridas:
 
 ```env
 DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/pricingmaster
-SECRET_KEY=your-secret-key
 ENVIRONMENT=development
+POSTGRES_DB=pricingmaster
+POSTGRES_USER=pricing_user
+POSTGRES_PASSWORD=pricing_pass
 ```
 
 ### 3. Base de datos
@@ -136,29 +146,23 @@ Levanta la API y PostgreSQL juntos. La API queda disponible en el puerto `8000`.
 
 ---
 
-## Running Tests
-
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run all unit tests
-pytest tests/unit/ -v
-
-# Run with coverage
-pytest tests/unit/ --cov=app/services --cov-report=term-missing
-
-# Run specific test file
-pytest tests/unit/test_pos_resolution.py -v
-```
-
 ## Tests
 
 ```bash
-pytest                        # todos los tests
-pytest tests/unit/            # solo lógica de negocio
-pytest tests/integration/     # solo endpoints
-pytest -k "resolucion"        # filtrar por nombre
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Todos los tests unitarios (26 tests)
+pytest tests/unit/ -v
+
+# Con cobertura
+pytest tests/unit/ --cov=app/services --cov-report=term-missing
+
+# Un archivo específico
+pytest tests/unit/test_pos_resolution.py -v
+
+# Filtrar por nombre
+pytest -k "resolucion"
 ```
 
 ---
@@ -228,4 +232,5 @@ Precedencia de precios: **SUCURSAL > COMERCIO > HOLDING**
 ## Documentación adicional
 
 - [`CLAUDE.md`](./CLAUDE.md) — contexto técnico detallado para asistentes AI
+- [`TASKS.md`](./TASKS.md) — roadmap v1→v5 (auth, audit, frontend, performance)
 - [`# Proyecto PricingMaster.md`](./%23%20Proyecto%20PricingMaster.md) — especificación completa de requerimientos (español)
