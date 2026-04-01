@@ -13,7 +13,7 @@ This file provides context and guidance for AI assistants working on this reposi
 
 The system supports hierarchical pricing (Holding → Merchant → Branch), promotion/benefit management, and a resolution engine that determines the final charge per terminal per period.
 
-**Current state:** This repository is in pre-implementation (specification) phase. It contains only requirements documentation. No source code, tests, or infrastructure exists yet.
+**Current state:** v1 scaffold implemented. Full FastAPI + PostgreSQL application with all 11 database models, Pydantic schemas, POS + MDR resolution engines, REST API routes, unit tests, and Docker setup. No authentication in v1 (all routes public — JWT + RBAC planned for v2).
 
 ---
 
@@ -21,12 +21,80 @@ The system supports hierarchical pricing (Holding → Merchant → Branch), prom
 
 ```
 pricing-master/
-├── CLAUDE.md                          # This file
-├── README.md                          # Minimal placeholder
-└── # Proyecto PricingMaster.md        # Full requirements specification (Spanish, 624 lines)
+├── app/
+│   ├── main.py                        # FastAPI entry point
+│   ├── config.py                      # Pydantic BaseSettings
+│   ├── dependencies.py                # DB session injection
+│   ├── core/
+│   │   ├── enums.py                   # All domain ENUMs
+│   │   └── exceptions.py             # HTTP exception wrappers
+│   ├── db/
+│   │   ├── base.py                    # SQLAlchemy DeclarativeBase
+│   │   └── session.py                # Async engine + session factory
+│   ├── models/                        # SQLAlchemy 2.x models (11 tables)
+│   │   ├── commercial.py             # Holdings, Comercios, Sucursales, Terminales
+│   │   ├── pos.py                    # POS_Tarifas, POS_Tarifa_Asignaciones
+│   │   ├── mdr.py                    # MDR_Tarifas, MDR_Tarifa_Asignaciones
+│   │   ├── promotions.py             # Promotions, Promotion_Assignments
+│   │   └── transactions.py           # Transacciones_Mensual
+│   ├── schemas/                       # Pydantic v2 schemas
+│   │   ├── commercial.py
+│   │   ├── pos.py
+│   │   ├── mdr.py
+│   │   ├── promotions.py
+│   │   └── resolucion.py
+│   ├── services/
+│   │   ├── pos_service.py
+│   │   ├── mdr_service.py
+│   │   ├── promotion_service.py
+│   │   ├── resolucion_pos.py         # ⚡ POS resolution engine
+│   │   └── resolucion_mdr.py         # ⚡ MDR resolution engine
+│   └── api/
+│       ├── commercial.py
+│       ├── pos_tarifas.py
+│       ├── mdr_tarifas.py
+│       ├── promotions.py
+│       └── resolucion.py
+├── alembic/                           # DB migrations
+│   └── versions/
+├── tests/
+│   ├── conftest.py                   # Async SQLite in-memory fixtures
+│   ├── unit/
+│   │   ├── test_pos_resolution.py
+│   │   ├── test_mdr_resolution.py
+│   │   └── test_validations.py
+│   └── integration/
+├── .env.example
+├── .gitignore
+├── alembic.ini
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+├── TASKS.md
+├── CLAUDE.md
+└── README.md
 ```
 
 The main specification document (`# Proyecto PricingMaster.md`) is the authoritative source of truth for all business logic, data models, API design, and validation rules.
+
+---
+
+## Implementation Status
+
+| Component | Status | Notes |
+|---|---|---|
+| Database models | ✅ v1 | All 11 tables, SQLAlchemy 2.x Mapped[] syntax |
+| Pydantic schemas | ✅ v1 | Pydantic v2, from_attributes=True |
+| POS resolution engine | ✅ v1 | ADQUISICION, USO tranches, PERMANENTE_LIMITADO/ILIMITADO |
+| MDR resolution engine | ✅ v1 | All mecanismos, FIJO/VARIABLE/MIXTO |
+| REST API | ✅ v1 | All 20+ endpoints, no auth |
+| Alembic migrations | ✅ v1 | Async env.py, autogenerate ready |
+| Docker setup | ✅ v1 | PostgreSQL 16 + FastAPI |
+| Unit tests | ✅ v1 | Resolution engine + validations |
+| Authentication (JWT) | 🔲 v2 | Planned: operador/supervisor/admin roles |
+| Approval workflow | 🔲 v2 | MDR rate reductions requiring supervisor |
+| Audit logs | 🔲 v3 | Full MDR change history |
+| Frontend | 🔲 v4 | React + TypeScript dashboard |
 
 ---
 
