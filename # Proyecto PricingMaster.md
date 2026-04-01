@@ -20,13 +20,13 @@ El modelo de precios POS se compone de dos capas independientes:
 * **RF1.2 Gestión de Holdings:** Capacidad de agrupar múltiples comercios bajo una misma entidad legal o corporativa para aplicar reglas de negocio globales. Los comercios pueden o no estar asociados a un holding. El holding es una entidad legal que puede tener uno o más comercios asociados. El holding también tiene un RUT.
 * **RF1.3 Gestión de Sucursales:** Cada comercio debe tener al menos una sucursal. Las sucursales agrupan las terminales por ubicación física y constituyen el nivel más granular de asignación de promociones. Cada sucursal pertenece a un único comercio y debe tener al menos una terminal asociada.
 * **RF1.4 Jerarquización:** Vinculación de comercios a holdings existentes y posibilidad de mover comercios entre diferentes grupos. Además, debe considerarse que un comercio puede tener múltiples sucursales, y cada sucursal puede tener múltiples terminales.
-* **RF1.5 Gestión de Terminales:** Cada sucursal debe tener al menos una terminal. Las terminales son los puntos de venta físicos de un comercio. Cada terminal pertenece a una única sucursal y debe tener un identificador único.
+* **RF1.5 Gestión de Terminales:** Cada sucursal debe tener al menos una terminal. Las terminales son los puntos de venta físicos de un comercio. Cada terminal pertenece a una única sucursal y debe tener un identificador único. Cada terminal tiene asignada una tecnología (POS, Tap On Phone, Checkout, etc) y un modelo de equipo cuando su tecnología sea POS (ej: Ingenico MOVE/5000).
 
 ### RF2: Motor de Tarifas
 
-* **RF2.1 Gestión de Tarifas Base POS:** Catálogo de precios fijos mensuales de arriendo de terminal expresados en UF. Cada entidad (holding, comercio o sucursal) tiene asignada una tarifa base. La precedencia es `SUCURSAL` > `COMERCIO` > `HOLDING`. La tarifa base es la base sobre la cual se aplican los beneficios de las promociones POS. Las tarifas pueden ir entre 0,00 y 1,00UF mensuales, considerando 2 decimales. Estos deben ser seleccionados por el usuario desde un catálogo de tarifas base.
-* **RF2.2 Configuración de Beneficios sobre Tarifa POS:** Definición de descuentos o exenciones aplicables sobre la tarifa base. Cada beneficio combina un **mecanismo de activación** con un **nivel de beneficio**, y puede configurarse a nivel de holding, comercio o sucursal individual.
-  * **Creación de un Beneficio en el sistema:** Se pueden crear paquetes de beneficios que se aplicarán a una entidad (holding, comercio o sucursal) de forma permanente o temporal. Estos deben contener nombre, descripción, valor, nivel de aplicación (holding, comercio o sucursal), mecanismos de activación, tipo de beneficio, y fechas de inicio y fin de vigencia. Estos deben ser creados por el usuario desde la interfaz de usuario o cargados desde un archivo CSV.
+* **RF2.1 Gestión de Tarifas Base POS:** Catálogo de precios fijos mensuales de arriendo de terminal expresados en UF. Cada holding, comercio, sucursal, terminal tiene asignada una tarifa base. La precedencia es `TERMINAL`>`SUCURSAL` > `COMERCIO` > `HOLDING`. La tarifa base es la base sobre la cual se aplican los beneficios de las promociones POS. Las tarifas pueden ir entre 0,00 y 1,00UF mensuales, considerando 2 decimales. Estos deben ser seleccionados por el usuario desde un catálogo de tarifas base.
+* **RF2.2 Configuración de Beneficios sobre Tarifa POS:** Definición de descuentos o exenciones aplicables sobre la tarifa base. Cada beneficio combina un **mecanismo de activación** con un **nivel de beneficio**, y puede configurarse a nivel de holding, comercio, sucursal o terminal individual.
+  * **Creación de un Beneficio en el sistema:** Se pueden crear paquetes de beneficios que se aplicarán a una entidad (holding, comercio o sucursal) de forma permanente o temporal. Estos deben contener nombre, descripción, valor, nivel de aplicación (holding, comercio, sucursal o terminal), mecanismos de activación, tipo de beneficio, y fechas de inicio y fin de vigencia. Estos deben ser creados por el usuario desde la interfaz de usuario o cargados desde un archivo CSV.
   * **Mecanismos de activación:**
     * **Por adquisición:** se activa al momento de adquirir el servicio de adquirencia, por un tiempo determinado.
     * **Por uso:** se activa cuando el comercio supera X millones de pesos transaccionados en el mes. Se otorga un beneficio de 1 POS Costo Cero por cada X millones de pesos transaccionados.
@@ -39,6 +39,7 @@ El modelo de precios POS se compone de dos capas independientes:
     * **Holding:** el beneficio se aplica a todos los comercios del holding.
     * **Comercio:** el beneficio se aplica a todos las sucursales del comercio.
     * **Sucursal:** el beneficio se aplica a todas las terminales de la sucursal.
+    * **Terminal:** el beneficio se aplica a una terminal o conjunto de terminales especificados con su número de terminal.
 
 * **RF2.3 Configuración de Beneficios sobre MDR:** Definición de descuentos aplicables sobre la tasa base de descuento que el adquirente cobra al comercio por procesar transacciones. Cada beneficio combina un **mecanismo de activación** con un **nivel de beneficio**, y puede configurarse a nivel de holding, comercio o sucursal individual.
   * **Creación de un Beneficio MDR en el sistema:** Se pueden crear paquetes de beneficios MDR que se aplicarán a una entidad (holding, comercio o sucursal) de forma permanente o temporal. Estos deben contener nombre, descripción, valor, nivel de aplicación (holding, comercio o sucursal), mecanismo de activación, tipo de beneficio, y fechas de inicio y fin de vigencia. Deben ser creados por el usuario desde la interfaz de usuario o cargados desde un archivo CSV.
@@ -59,7 +60,7 @@ El modelo de precios POS se compone de dos capas independientes:
 
 ### RF3: Asignación y Ciclo de Vida
 
-* **RF3.1 Registro de Promociones:** Vincular una promoción específica a un holding, a un comercio completo o a una sucursal individual. La promoción puede ser de POS o de MDR.
+* **RF3.1 Registro de Promociones:** Vincular una promoción específica a un holding, a un comercio completo o a una sucursal / terminal individual. La promoción puede ser de POS o de MDR.
 * **RF3.2 Actualización Dinámica:** Modificar condiciones de promociones vigentes sin interrumpir la operación.
 * **RF3.3 Histórico de Cambios:** Registro de auditoría sobre quién modificó qué promoción y cuándo, y a qué comercio o holding se aplicó.
 
